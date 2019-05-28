@@ -72,12 +72,10 @@ func UpdateAllTableColumn(dbConn *sql.DB, t string, col string, val string) erro
 	return nil
 }
 
-// UpdateRowTableColumn increments a value for each row in a column
-func UpdateRowTableColumn(dbConn *sql.DB, t string, col string, val string) error {
-	var count int64
-	count++
-
-	updateQuery := fmt.Sprintf("UPDATE \"%s\" SET \"%s\" = '%s'", t, col, val)
+// IncrementRowTableColumn increments a value for each row in a column by another column specified via incCol
+func IncrementRowTableColumn(dbConn *sql.DB, t string, col string, newVal string, incCol string) error {
+	updateQuery := fmt.Sprintf("UPDATE \"%s\" t "+
+		"SET \"%s\" = '%s' || (SELECT \"%s\" FROM \"%s\" WHERE \"%s\" = t.\"%s\")", t, col, newVal, incCol, t, incCol, incCol)
 	log.Debugf(updateQuery)
 	_, err := dbConn.Query(updateQuery)
 	if err != nil {

@@ -11,17 +11,17 @@ import (
 )
 
 var (
-	practicePasswordShort   = "Updates OAuthClient table with 'development' defaults and Sanitizes User Passwords in the Users Table"
-	practicePasswordExample = "usage: px-db plugin practice-password"
+	practicePIIShort   = "Custom logic for updating OAuthClient table with 'development' defaults and Sanitizes User PII in the Users Table"
+	practicePIIExample = "usage: px-db plugin practice-pii"
 )
 
-// PracticePasswordOptions Control options flags around password table updates
-type PracticePasswordOptions struct {
+// PracticePIIOptions Control options flags around password table updates
+type PracticePIIOptions struct {
 	*PluginOptions
 }
 
-// NewPracticePasswordCmd Updates OAuthClient table with 'development' defaults and Sanitizes User Passwords in the Users Table
-func NewPracticePasswordCmd(pluginOptions PluginOptions) *cobra.Command {
+// NewPracticePIICmd Updates OAuthClient table with 'development' defaults and Sanitizes User PIIs in the Users Table
+func NewPracticePIICmd(pluginOptions PluginOptions) *cobra.Command {
 	/*
 		tableOptions := DeleteTableOptions{
 			SanitizeOptions: &sanitizeOptions,
@@ -30,17 +30,17 @@ func NewPracticePasswordCmd(pluginOptions PluginOptions) *cobra.Command {
 	cmd := &cobra.Command{
 		TraverseChildren: true,
 		SilenceUsage:     true,
-		Use:              "practice-password",
-		Short:            practicePasswordShort,
-		Example:          practicePasswordExample,
-		RunE:             practicePassword,
+		Use:              "practice-pii",
+		Short:            practicePIIShort,
+		Example:          practicePIIExample,
+		RunE:             practicePII,
 	}
 
 	return cmd
 }
 
-func practicePassword(cmd *cobra.Command, args []string) error {
-	logContext := "[Plugins Practice Password]"
+func practicePII(cmd *cobra.Command, args []string) error {
+	logContext := "[Plugins Practice PII]"
 	log.Infof("%s Sanitizing OAuth and Users tables (passwords, emails, and OAuth Keys)...", logContext)
 
 	dbConn, err := pq.NewDBConnection(&pq.DBConnectionOptions{
@@ -71,7 +71,7 @@ func practicePassword(cmd *cobra.Command, args []string) error {
 		return errors.Wrap(err, logContext)
 	}
 
-	if err := pq.UpdateAllTableColumn(dbConn, oauthTable, "key", password.APIKey); err != nil {
+	if err := pq.IncrementRowTableColumn(dbConn, oauthTable, "key", password.APIKey, "id"); err != nil {
 		return errors.Wrap(err, logContext)
 	}
 

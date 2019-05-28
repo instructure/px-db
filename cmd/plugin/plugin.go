@@ -10,7 +10,7 @@ type PluginOptions struct {
 
 var (
 	pluginShort   = "Run Plugins that perform custom logic for PostgreSQL DB Table Sanitization"
-	pluginExample = "usage: px-db plugin [practice-password|some command]"
+	pluginExample = "usage: px-db plugin [practice-pii|some-plugin]"
 )
 
 // NewPluginCmd Sanitize a PostgreSQL DB
@@ -23,6 +23,6 @@ func NewPluginCmd() *cobra.Command {
 		Example: pluginExample,
 	}
 
-	cmd.AddCommand(NewPracticePasswordCmd(options))
+	cmd.AddCommand(NewPracticePIICmd(options))
 	return cmd
 }
