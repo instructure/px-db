@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
+	// To avoid name collision
 	_ "github.com/lib/pq"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"

@@ -5,7 +5,6 @@ import (
 	"strings"
 
 	"github.com/instructure/px-db/cmd"
-	"github.com/instructure/px-db/plugins/password"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
@@ -34,11 +33,6 @@ func init() {
 }
 
 func main() {
-	o := password.OAuth{}
-	_, err := password.Retrieve(&o)
-	if err != nil {
-		log.Error(err)
-	}
 	rootCommand := cmd.NewCmdRoot()
 	if err := rootCommand.Execute(); err != nil {
 		log.Error(err)

@@ -59,3 +59,30 @@ func DeleteTable(dbConn *sql.DB, t string, isCascade bool) error {
 
 	return nil
 }
+
+// UpdateAllTableColumn update all row values in a column
+func UpdateAllTableColumn(dbConn *sql.DB, t string, col string, val string) error {
+	updateQuery := fmt.Sprintf("UPDATE \"%s\" SET \"%s\" = '%s'", t, col, val)
+	log.Debugf(updateQuery)
+	_, err := dbConn.Query(updateQuery)
+	if err != nil {
+		return fmt.Errorf("Unable to Update Table Column in %s error for %s: %v", t, col, err)
+	}
+
+	return nil
+}
+
+// UpdateRowTableColumn increments a value for each row in a column
+func UpdateRowTableColumn(dbConn *sql.DB, t string, col string, val string) error {
+	var count int64
+	count++
+
+	updateQuery := fmt.Sprintf("UPDATE \"%s\" SET \"%s\" = '%s'", t, col, val)
+	log.Debugf(updateQuery)
+	_, err := dbConn.Query(updateQuery)
+	if err != nil {
+		return fmt.Errorf("Unable to Update Table Column in %s error for %s: %v", t, col, err)
+	}
+
+	return nil
+}
