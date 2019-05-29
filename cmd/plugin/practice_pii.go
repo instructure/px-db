@@ -43,11 +43,15 @@ func practicePII(cmd *cobra.Command, args []string) error {
 	logContext := "[Plugins Practice PII]"
 	log.Infof("%s Sanitizing OAuth and Users tables (passwords, emails, and OAuth Keys)...", logContext)
 
+	port, _ := cmd.Flags().GetInt64("db-port")
+	isSSL, _ := cmd.Flags().GetBool("db-ssl-mode")
+
 	dbConn, err := pq.NewDBConnection(&pq.DBConnectionOptions{
 		Endpoint: cmd.Flag("db-endpoint").Value.String(),
 		Name:     cmd.Flag("db-name").Value.String(),
 		Password: viper.GetString("DB_PASSWORD"),
-		SSLMode:  viper.GetBool("db-ssl-mode"),
+		Port:     port,
+		SSLMode:  isSSL,
 		User:     cmd.Flag("db-user").Value.String(),
 	})
 	if err != nil {

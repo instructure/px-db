@@ -16,6 +16,7 @@ type RootOptions struct {
 	dbName     string
 	dbUser     string
 	dbEndpoint string
+	dbPort     int64
 	dbSSL      bool
 }
 
@@ -69,10 +70,11 @@ func NewCmdRoot() *cobra.Command {
 	}
 
 	// Not using at the moment cmd.PersistentFlags().StringVar(&options.configFile, "config", "", "path to config file (default $HOME/.px-db-sanitizer/config)")
-	cmd.PersistentFlags().StringVar(&options.dbEndpoint, "db-endpoint", "", "PostgreSQL Connection String")
-	cmd.PersistentFlags().StringVar(&options.dbName, "db-name", "", "PostgreSQL Connection String")
-	cmd.PersistentFlags().BoolVar(&options.dbSSL, "db-ssl-mode", true, "PostgreSQL Connection String")
-	cmd.PersistentFlags().StringVar(&options.dbUser, "db-user", "", "PostgreSQL Connection String")
+	cmd.PersistentFlags().StringVar(&options.dbEndpoint, "db-endpoint", "", "PostgreSQL Hostname/Endpoint")
+	cmd.PersistentFlags().StringVar(&options.dbName, "db-name", "", "PostgreSQL Database Name")
+	cmd.PersistentFlags().Int64Var(&options.dbPort, "db-port", 5432, "PostgreSQL Bind Port")
+	cmd.PersistentFlags().BoolVar(&options.dbSSL, "db-ssl-mode", false, "PostgreSQL SSL Mode (default false)")
+	cmd.PersistentFlags().StringVar(&options.dbUser, "db-user", "", "PostgreSQL User")
 
 	// create subcommands
 	cmd.AddCommand(sanitize.NewSanitizeCmd())

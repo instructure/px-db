@@ -10,7 +10,7 @@ type SanitizeOptions struct {
 
 var (
 	sanitizeShort   = "Sanitize a PostgreSQL DB"
-	sanitizeExample = "usage: px-db sanitize [tables|some command]"
+	sanitizeExample = "usage: px-db sanitize [delete-tables|some-command]"
 )
 
 // NewSanitizeCmd Sanitize a PostgreSQL DB

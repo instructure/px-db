@@ -15,6 +15,7 @@ type DBConnectionOptions struct {
 	Endpoint string
 	Name     string
 	Password string
+	Port     int64
 	User     string
 	SSLMode  bool
 }
@@ -29,9 +30,15 @@ func NewDBConnection(d *DBConnectionOptions) (*sql.DB, error) {
 		sslmode = "disable"
 	}
 
-	connStr := fmt.Sprintf("postgres://%s:%s@%s/%s?sslmode=%s", d.User, d.Password, d.Endpoint, d.Name, sslmode)
-	log.Debugf("DB Conn String: postgres://%s:<sanitized_password>@%s/%s?sslmode=%s", d.User, d.Endpoint, d.Name, sslmode)
-	db, err := sql.Open("postgres", connStr)
+	connParams := fmt.Sprintf("host=%s port=%d user=%s "+
+		"password=%s dbname=%s sslmode=%s",
+		d.Endpoint, d.Port, d.User, d.Password, d.Name, sslmode)
+	connParamsSanitized := fmt.Sprintf("host=%s port=%d user=%s "+
+		"password=<sanitized> dbname=%s sslmode=%s",
+		d.Endpoint, d.Port, d.User, d.Name, sslmode)
+
+	log.Debugf(connParamsSanitized)
+	db, err := sql.Open("postgres", connParams)
 	if err != nil {
 		return nil, errors.Wrap(err, fmt.Sprintf("Error connection to Database: %v", err))
 	}

@@ -24,10 +24,10 @@ func init() {
 
 	// Only log debug or info levels
 	logLevel := viper.GetString("px_db_log_level")
-	log.Println("Using Log Level:", logLevel)
 	if strings.ToLower(logLevel) == "info" {
 		log.SetLevel(log.InfoLevel)
 	} else if strings.ToLower(logLevel) == "debug" {
+		log.Println("Using Log Level:", logLevel)
 		log.SetLevel(log.DebugLevel)
 	} else {
 		log.Fatal("Invalid log level specified - valid values: 'INFO' and 'DEBUG'")

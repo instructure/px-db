@@ -48,11 +48,16 @@ func deleteTables(cmd *cobra.Command, args []string) error {
 	logContext := "[Sanitize Tables Deletion]"
 	log.Infof("%s Sanitizing specific tables via deletion...", logContext)
 
+	port, _ := cmd.Flags().GetInt64("db-port")
+	isSSL, _ := cmd.Flags().GetBool("db-ssl-mode")
+	isCascade, _ := cmd.Flags().GetBool("cascade-mode")
+
 	dbConn, err := pq.NewDBConnection(&pq.DBConnectionOptions{
 		Endpoint: cmd.Flag("db-endpoint").Value.String(),
 		Name:     cmd.Flag("db-name").Value.String(),
 		Password: viper.GetString("DB_PASSWORD"),
-		SSLMode:  viper.GetBool("db-ssl-mode"),
+		Port:     port,
+		SSLMode:  isSSL,
 		User:     cmd.Flag("db-user").Value.String(),
 	})
 	if err != nil {
@@ -60,8 +65,7 @@ func deleteTables(cmd *cobra.Command, args []string) error {
 	}
 
 	tableFmt, _ := cmd.Flags().GetString("db-tables")
-	tables := strings.SplitAfter(tableFmt, ",")
-	isCascade, _ := cmd.Flags().GetBool("cascade-mode")
+	tables := strings.Split(tableFmt, ",")
 	log.Debugf("%s Deleting Table contents: %v", logContext, tables)
 	log.Debugf("Length: %d Value: %s", len(tables), tables[0])
 	if (len(tables)-1) >= 0 && tables[0] == "" {

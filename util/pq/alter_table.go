@@ -49,7 +49,7 @@ func alterTableConstraint(dbConn *sql.DB, t string, constraintName string) error
 func DropConstraints(dbConn *sql.DB, props *BaseAlterTableProperties) error {
 	t := props.Table
 	constraintQuery := fmt.Sprintf("ALTER TABLE \"%s\" DISABLE trigger ALL;"+
-		"SELECT constraint_name FROM information_schema.constraint_table_usage WHERE table_name = '%s'", t, t)
+		"SELECT constraint_name, table_name FROM information_schema.constraint_table_usage WHERE table_name = '%s'", t, t)
 	log.Debugf(constraintQuery)
 	rows, err := dbConn.Query(constraintQuery)
 	if err != nil {
@@ -58,8 +58,9 @@ func DropConstraints(dbConn *sql.DB, props *BaseAlterTableProperties) error {
 
 	for rows.Next() {
 		var constraintName string
+		var tableName string
 
-		if err := rows.Scan(&constraintName); err != nil {
+		if err := rows.Scan(&constraintName, &tableName); err != nil {
 			return fmt.Errorf("Unable to get contraints for Table: %s - %v", t, err)
 		}
 
