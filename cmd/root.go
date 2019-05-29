@@ -3,6 +3,7 @@ package cmd
 import (
 	"os"
 
+	"github.com/instructure/px-db/cmd/display"
 	"github.com/instructure/px-db/cmd/plugin"
 	"github.com/instructure/px-db/cmd/sanitize"
 	"github.com/instructure/px-db/version"
@@ -67,7 +68,7 @@ func NewCmdRoot() *cobra.Command {
 		Version: version.Print(),
 	}
 
-	cmd.PersistentFlags().StringVar(&options.configFile, "config", "", "path to config file (default $HOME/.px-db-sanitizer/config)")
+	// Not using at the moment cmd.PersistentFlags().StringVar(&options.configFile, "config", "", "path to config file (default $HOME/.px-db-sanitizer/config)")
 	cmd.PersistentFlags().StringVar(&options.dbEndpoint, "db-endpoint", "", "PostgreSQL Connection String")
 	cmd.PersistentFlags().StringVar(&options.dbName, "db-name", "", "PostgreSQL Connection String")
 	cmd.PersistentFlags().BoolVar(&options.dbSSL, "db-ssl-mode", true, "PostgreSQL Connection String")
@@ -76,5 +77,6 @@ func NewCmdRoot() *cobra.Command {
 	// create subcommands
 	cmd.AddCommand(sanitize.NewSanitizeCmd())
 	cmd.AddCommand(plugin.NewPluginCmd())
+	cmd.AddCommand(display.NewDisplayCmd())
 	return cmd
 }

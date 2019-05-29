@@ -66,18 +66,54 @@ func practicePII(cmd *cobra.Command, args []string) error {
 	log.Infof("Password: %s and %s key: %s", userPassword, oauthPassword, password.APIKey)
 
 	// Update the OAuth Table
-	oauthTable := "OAuthClient"
-	if err := pq.UpdateAllTableColumn(dbConn, oauthTable, "secretHash", oauthPassword); err != nil {
+	baseOAuthProps := pq.BaseAlterTableProperties{Table: "OAuthClient"}
+	if err := pq.UpdateTableByColumn(dbConn, &pq.UpdateTableByColumnProperties{
+		BaseAlterTableProperties: baseOAuthProps,
+		Column:                   "secretHash",
+		NewVal:                   oauthPassword,
+	}); err != nil {
 		return errors.Wrap(err, logContext)
 	}
 
-	if err := pq.IncrementRowTableColumn(dbConn, oauthTable, "key", password.APIKey, "id"); err != nil {
+	if err := pq.UpdateTableByColumnUnique(dbConn, &pq.UpdateTableByColumnUniqueProperties{
+		BaseAlterTableProperties: baseOAuthProps,
+		Column:                   "key",
+		NewValPrefix:             password.APIKey,
+		IncrementByColumn:        "id",
+	}); err != nil {
 		return errors.Wrap(err, logContext)
 	}
 
-	// Update the Users Passwords in User Table
-	userTable := "User"
-	if err := pq.UpdateAllTableColumn(dbConn, userTable, "passwordHash", userPassword); err != nil {
+	// Update the Users' Passwords in User Table
+	baseUserProps := pq.BaseAlterTableProperties{Table: "User"}
+	if err := pq.UpdateTableByColumn(dbConn, &pq.UpdateTableByColumnProperties{
+		BaseAlterTableProperties: baseUserProps,
+		Column:                   "passwordHash",
+		NewVal:                   userPassword,
+	}); err != nil {
+		return errors.Wrap(err, logContext)
+	}
+
+	if err := pq.UpdateTableByColumnUnique(dbConn, &pq.UpdateTableByColumnUniqueProperties{
+		BaseAlterTableProperties: baseUserProps,
+		Column:                   "name",
+		NewValPrefix:             "px-automation",
+		IncrementByColumn:        "id",
+	}); err != nil {
+		return errors.Wrap(err, logContext)
+	}
+
+	// Update the Users' emails in the UserEmail Table
+	baseUserEmailProps := pq.BaseAlterTableProperties{Table: "UserEmail"}
+	if err := pq.UpdateTableByColumnUniqueFmt(dbConn, &pq.UpdateTableByColumnUniqueFmtProperties{
+		UpdateTableByColumnUniqueProperties: pq.UpdateTableByColumnUniqueProperties{
+			BaseAlterTableProperties: baseUserEmailProps,
+			Column:                   "address",
+			IncrementByColumn:        "id",
+			NewValPrefix:             "px-automation+",
+		},
+		NewValSuffix: "@instructure.com",
+	}); err != nil {
 		return errors.Wrap(err, logContext)
 	}
 

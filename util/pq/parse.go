@@ -2,12 +2,26 @@ package pq
 
 import (
 	"database/sql"
+	"fmt"
 
 	log "github.com/sirupsen/logrus"
 )
 
-// ParseRow Parse PostgreSQL Rows in a dynamic fashion
-func ParseRow(rows *sql.Rows, cols []string) error {
+// DisplayRows Parse PostgreSQL Rows in a dynamic fashion
+func DisplayRows(dbConn *sql.DB, t string) error {
+
+	displayQuery := fmt.Sprintf("SELECT * FROM \"%s\"", t)
+	log.Debugf(displayQuery)
+
+	rows, err := dbConn.Query(displayQuery)
+	if err != nil {
+		return err
+	}
+
+	cols, err := rows.Columns()
+	if err != nil {
+		return err
+	}
 
 	for rows.Next() {
 		// Create a slice of interface{}'s to represent each column,
@@ -32,7 +46,7 @@ func ParseRow(rows *sql.Rows, cols []string) error {
 		}
 
 		// Outputs: map[columnName:value columnName2:value2 columnName3:value3 ...]
-		log.Info(m)
+		fmt.Println(m)
 	}
 	return nil
 }

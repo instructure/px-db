@@ -7,9 +7,35 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+// BaseAlterTableProperties <TODO>
+type BaseAlterTableProperties struct {
+	Table string
+}
+
+// UpdateTableByColumnProperties <TODO>
+type UpdateTableByColumnProperties struct {
+	BaseAlterTableProperties
+	Column string
+	NewVal string
+}
+
+// UpdateTableByColumnUniqueProperties <TODO>
+type UpdateTableByColumnUniqueProperties struct {
+	BaseAlterTableProperties
+	Column            string
+	IncrementByColumn string
+	NewValPrefix      string
+}
+
+// UpdateTableByColumnUniqueFmtProperties <TODO>
+type UpdateTableByColumnUniqueFmtProperties struct {
+	UpdateTableByColumnUniqueProperties
+	NewValSuffix string
+}
+
 // AlterTable <TODO>
-func alterTableConstraint(dbConn *sql.DB, t string, c string) error {
-	alterQuery := fmt.Sprintf("ALTER TABLE \"%s\" DROP CONSTRAINT IF EXISTS \"%s\" CASCADE", t, c)
+func alterTableConstraint(dbConn *sql.DB, t string, constraintName string) error {
+	alterQuery := fmt.Sprintf("ALTER TABLE \"%s\" DROP CONSTRAINT IF EXISTS \"%s\" CASCADE", t, constraintName)
 	log.Debugf(alterQuery)
 	_, err := dbConn.Query(alterQuery)
 	if err != nil {
@@ -20,8 +46,10 @@ func alterTableConstraint(dbConn *sql.DB, t string, c string) error {
 }
 
 // DropConstraints <TODO>
-func DropConstraints(dbConn *sql.DB, t string) error {
-	constraintQuery := fmt.Sprintf("ALTER TABLE \"%s\" DISABLE trigger ALL;SELECT constraint_name FROM information_schema.constraint_table_usage WHERE table_name = '%s'", t, t)
+func DropConstraints(dbConn *sql.DB, props *BaseAlterTableProperties) error {
+	t := props.Table
+	constraintQuery := fmt.Sprintf("ALTER TABLE \"%s\" DISABLE trigger ALL;"+
+		"SELECT constraint_name FROM information_schema.constraint_table_usage WHERE table_name = '%s'", t, t)
 	log.Debugf(constraintQuery)
 	rows, err := dbConn.Query(constraintQuery)
 	if err != nil {
@@ -44,7 +72,8 @@ func DropConstraints(dbConn *sql.DB, t string) error {
 }
 
 // DeleteTable <TODO>
-func DeleteTable(dbConn *sql.DB, t string, isCascade bool) error {
+func DeleteTable(dbConn *sql.DB, props *BaseAlterTableProperties, isCascade bool) error {
+	t := props.Table
 	var deleteTableQuery string
 	if isCascade {
 		deleteTableQuery = fmt.Sprintf("TRUNCATE \"%v\" CASCADE", t)
@@ -60,8 +89,12 @@ func DeleteTable(dbConn *sql.DB, t string, isCascade bool) error {
 	return nil
 }
 
-// UpdateAllTableColumn update all row values in a column
-func UpdateAllTableColumn(dbConn *sql.DB, t string, col string, val string) error {
+// UpdateTableByColumn update a column for all rows in a table with the same new value
+func UpdateTableByColumn(dbConn *sql.DB, props *UpdateTableByColumnProperties) error {
+	t := props.Table
+	col := props.Column
+	val := props.NewVal
+
 	updateQuery := fmt.Sprintf("UPDATE \"%s\" SET \"%s\" = '%s'", t, col, val)
 	log.Debugf(updateQuery)
 	_, err := dbConn.Query(updateQuery)
@@ -72,10 +105,38 @@ func UpdateAllTableColumn(dbConn *sql.DB, t string, col string, val string) erro
 	return nil
 }
 
-// IncrementRowTableColumn increments a value for each row in a column by another column specified via incCol
-func IncrementRowTableColumn(dbConn *sql.DB, t string, col string, newVal string, incCol string) error {
+// UpdateTableByColumnUnique increments onto a new prefix value for a column in each row within a table
+// Leverages an IncrementByColumn to append a unique row value for that column onto the NewValPrefix
+func UpdateTableByColumnUnique(dbConn *sql.DB, props *UpdateTableByColumnUniqueProperties) error {
+	t := props.Table
+	col := props.Column
+	newValPrefix := props.NewValPrefix
+	incrementColumn := props.IncrementByColumn
+
 	updateQuery := fmt.Sprintf("UPDATE \"%s\" t "+
-		"SET \"%s\" = '%s' || (SELECT \"%s\" FROM \"%s\" WHERE \"%s\" = t.\"%s\")", t, col, newVal, incCol, t, incCol, incCol)
+		"SET \"%s\" = '%s' || (SELECT \"%s\" FROM \"%s\" WHERE \"%s\" = t.\"%s\")",
+		t, col, newValPrefix, incrementColumn, t, incrementColumn, incrementColumn)
+	log.Debugf(updateQuery)
+	_, err := dbConn.Query(updateQuery)
+	if err != nil {
+		return fmt.Errorf("Unable to Update Table Column in %s error for %s: %v", t, col, err)
+	}
+
+	return nil
+}
+
+// UpdateTableByColumnUniqueFmt increments and formats a new unique value via a prefix & suffix value for a column in each row within a table
+// Leverages an IncrementByColumn to enclose a unique value in between the supplied NewValPrefix and NewValSuffix
+func UpdateTableByColumnUniqueFmt(dbConn *sql.DB, props *UpdateTableByColumnUniqueFmtProperties) error {
+	t := props.Table
+	col := props.Column
+	newValPrefix := props.NewValPrefix
+	newValSuffix := props.NewValSuffix
+	incrementColumn := props.IncrementByColumn
+
+	updateQuery := fmt.Sprintf("UPDATE \"%s\" t "+
+		"SET \"%s\" = '%s' || (SELECT \"%s\" FROM \"%s\" WHERE \"%s\" = t.\"%s\") || '%s'",
+		t, col, newValPrefix, incrementColumn, t, incrementColumn, incrementColumn, newValSuffix)
 	log.Debugf(updateQuery)
 	_, err := dbConn.Query(updateQuery)
 	if err != nil {
