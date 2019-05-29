@@ -63,7 +63,7 @@ func practicePII(cmd *cobra.Command, args []string) error {
 		return errors.Wrap(err, logContext)
 	}
 
-	log.Infof("Password: %s and %s key: %s", userPassword, oauthPassword, password.APIKey)
+	log.Debugf("Password Hashes - User: %s OAuth: %s API Key: %s", userPassword, oauthPassword, password.APIKey)
 
 	// Update the OAuth Table
 	baseOAuthProps := pq.BaseAlterTableProperties{Table: "OAuthClient"}

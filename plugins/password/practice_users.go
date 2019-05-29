@@ -43,7 +43,7 @@ func Retrieve(r Retriever) (string, error) {
 // generatePasswordHash create the password hash for Admin and Internal Admin
 func (o *OAuth) generatePasswordHash() ([]byte, error) {
 	o.BCryptCost = 4
-	p := []byte(password)
+	p := []byte(apiSecret)
 	passwordHash, err := bcrypt.GenerateFromPassword(p, o.BCryptCost)
 	if err != nil {
 		return nil, fmt.Errorf("Issue Generating Password Hash: %v", err)
