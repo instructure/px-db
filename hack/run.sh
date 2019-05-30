@@ -4,13 +4,13 @@
 function check_rc() {
   rc=$1
 
-  if [ $rc != "0" ]; then
+  if [ "$rc" != "0" ]; then
     exit $rc
   fi
 }
 
 DB_PASSWORD=$(printenv DB_PASSWORD)
-if [ $DB_PASSWORD != "" ]; then
+if [ "$DB_PASSWORD" != "" ]; then
   export DB_PASSWORD=$DB_PASSWORD
 fi
 

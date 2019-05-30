@@ -24,6 +24,6 @@ rdsdv=$(aws ec2 describe-instances --region us-east-1 --filter "Name=tag-value,V
 1. Locally Run: `run.sh` to sanitize the DB
 1. On the RDS DV Instance Run: `docker exec -i -e POSTGRES_PASSWORD=practice px-db bash -c "pg_dump -v -h localhost -U practice -d practice_development|gzip > /var/tmp/sanitized-dump.gz"`
 1. On the RDS DV Instance Run: `docker cp px-db:/var/tmp/sanitized-dump.gz .`
-1. Locally use `scp` to copy the dump to your local machine: `scp -o "ProxyJump ${jump}" ec2-user@$rdsdv:sanitized-dump.gz .`
+1. Locally use `scp` to copy the dump to your local machine: `scp -o "ProxyJump ${jump}" ec2-user@"${rdsdv}":sanitized-dump.gz .`
 1. Purge the container and sanitized dump on the RDS DV Instance: `docker rm -f px-db && rm -f sanitized-dump.gz`
 1. Cleanup the RDS Restored Instance: `iad-px-db-prod-sanitization-restore`
