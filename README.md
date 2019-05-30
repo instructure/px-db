@@ -11,8 +11,8 @@ Consider the following: `git config --global url."git@github.com:".insteadOf "ht
 ## Building Locally
 
 ```bash
-go get github.com/instructure/px-cg-deploy
-cd $GOPATH/src/github.com/instructure/px-cg-deploy
+go get github.com/instructure/px-db
+cd $GOPATH/src/github.com/instructure/px-db
 go build
 ```
 
